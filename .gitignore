@@ -50,3 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Local metadata/configuration files
+**/.DS_Store
+.dist/
+.build/
+.vscode/
+.idea/
