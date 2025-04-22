@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/luismbvarona/GitHub/freetreegen/src/core",
+      "program": "/Users/luismbvarona/GitHub/freetreegen/src/core/build/Debug/outDebug"
+    }
+  ]
+}
