@@ -74,7 +74,7 @@ bool is_primary_rooted(FreeTree *tree) {
     }
 
     curr = layout[++m];
-    
+
     if (curr == 1) {
       one_count++;
     }
