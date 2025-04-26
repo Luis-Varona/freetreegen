@@ -6,13 +6,13 @@
 #include <stdbool.h>
 
 typedef struct {
-    TreeNode **children;
+    struct TreeNode **children;
     size_t num_children;
 } TreeNode;
 
 typedef struct {
-    int order;
-    int *layout;
+    size_t order;
+    size_t *layout;
 } FreeTree;
 
 FreeTree *build_tree_layout(TreeNode *node);
