@@ -4,32 +4,57 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// TODO: This does not yet work; lexicographical sorting != subtree size sorting
+// Lexicographical sorting involves first sorting by maximum subtree depth, then
+// by subtree size. Use SA-IS, and maybe go back to one-pass DFS with no sizes?
+static int treenode_cmp(const void *a, const void *b) {
+  const TreeNode *node_a = *(const TreeNode **)a;
+  const TreeNode *node_b = *(const TreeNode **)b;
+  size_t subtree_size_a = node_a->subtree_size;
+  size_t subtree_size_b = node_b->subtree_size;
+  return (subtree_size_a > subtree_size_b) - (subtree_size_a < subtree_size_b);
+}
+
+static size_t sort_subtrees(TreeNode *node) {
+  size_t subtree_size = 1;
+
+  for (size_t i = 0; i < node->num_children; i++) {
+    subtree_size += sort_subtrees(node->children[i]);
+  }
+
+  if (node->num_children > 1) {
+    qsort(node->children, node->num_children, sizeof(TreeNode *), treenode_cmp);
+  }
+
+  node->subtree_size = subtree_size;
+  return subtree_size;
+}
+
 // TODO: Here, and in the rest of the code, replace (failed) exits with errors
-static void dfs_collect(TreeNode *node, FreeTree *tree, size_t *capacity,
-                        size_t depth) {
+static void store_depths(TreeNode *node, FreeTree *tree, size_t *capacity,
+                         size_t depth) {
   if (tree->order >= *capacity) {
     *capacity *= 2;
     tree->layout = realloc(tree->layout, sizeof(size_t) * (*capacity));
 
     if (!tree->layout) {
-      fprintf(stderr, "Memory reallocation failed for `tree->layout`\n");
+      perror("Memory reallocation failed for `tree->layout`");
       exit(EXIT_FAILURE);
     }
   }
 
   tree->layout[tree->order++] = depth;
 
-  for (size_t i = 0; i < node->num_children; i++) {
-    dfs_collect(node->children[i], tree, capacity, depth + 1);
+  for (size_t i = node->num_children; i-- > 0;) { // Visit larger subtrees first
+    store_depths(node->children[i], tree, capacity, depth + 1);
   }
 }
 
-// TODO: This just builds a layout; how do we the lexicographically largest one?
 FreeTree *build_tree_layout(TreeNode *node) {
   FreeTree *tree = malloc(sizeof(FreeTree));
 
   if (!tree) {
-    fprintf(stderr, "Memory allocation failed for `tree`\n");
+    perror("Memory allocation failed for `tree`");
     exit(EXIT_FAILURE);
   }
 
@@ -38,15 +63,16 @@ FreeTree *build_tree_layout(TreeNode *node) {
   tree->layout = malloc(sizeof(size_t) * capacity);
 
   if (!tree->layout) {
-    fprintf(stderr, "Memory allocation failed for `tree->layout`\n");
+    perror("Memory allocation failed for `tree->layout`");
     exit(EXIT_FAILURE);
   }
 
-  dfs_collect(node, tree, &capacity, 0);
+  sort_subtrees(node);
+  store_depths(node, tree, &capacity, 0);
   tree->layout = realloc(tree->layout, sizeof(size_t) * tree->order);
 
   if (!tree->layout) {
-    fprintf(stderr, "Memory reallocation failed for `tree->layout`\n");
+    perror("Memory reallocation failed for `tree->layout`");
     exit(EXIT_FAILURE);
   }
 

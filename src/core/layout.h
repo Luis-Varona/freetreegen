@@ -5,9 +5,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-typedef struct {
+typedef struct TreeNode {
     struct TreeNode **children;
     size_t num_children;
+    size_t subtree_size;
 } TreeNode;
 
 typedef struct {
